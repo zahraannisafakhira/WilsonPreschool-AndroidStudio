@@ -1,4 +1,4 @@
-package com.example.wilsonpreschool;
+package com.example.wilsonpreschool.Activity;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +11,15 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+
+import com.example.wilsonpreschool.AccountActivity;
+import com.example.wilsonpreschool.BlogFragment;
+import com.example.wilsonpreschool.ContactFragment;
+import com.example.wilsonpreschool.HomeFragment;
+import com.example.wilsonpreschool.LogoutActivity;
+import com.example.wilsonpreschool.ProgramsFragment;
+import com.example.wilsonpreschool.R;
+import com.example.wilsonpreschool.RegistrationFragment;
 import com.example.wilsonpreschool.databinding.ActivityMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
