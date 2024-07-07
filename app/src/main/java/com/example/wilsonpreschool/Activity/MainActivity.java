@@ -1,37 +1,20 @@
-package com.example.wilsonpreschool.Activity;
+package com.example.wilsonpreschool;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.CompositePageTransformer;
-import androidx.viewpager2.widget.MarginPageTransformer;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ArrayAdapter;
-
-import com.example.wilsonpreschool.Adapter.SliderAdapter;
-import com.example.wilsonpreschool.BlogFragment;
-import com.example.wilsonpreschool.ContactFragment;
-import com.example.wilsonpreschool.Domain.Programs;
-import com.example.wilsonpreschool.Domain.SliderItems;
-import com.example.wilsonpreschool.HomeFragment;
-import com.example.wilsonpreschool.ProgramsFragment;
-import com.example.wilsonpreschool.R;
-import com.example.wilsonpreschool.RegistrationFragment;
 import com.example.wilsonpreschool.databinding.ActivityMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
-
-public class MainActivity extends BaseActivity {
+public class MainActivity extends AppCompatActivity {
 
     ActivityMainBinding binding;
 
@@ -41,8 +24,6 @@ public class MainActivity extends BaseActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         replaceFragment(new HomeFragment());
-
-
 
         binding.bottomNavigationView.setOnItemSelectedListener(new BottomNavigationView.OnItemSelectedListener() {
             @Override
@@ -70,5 +51,27 @@ public class MainActivity extends BaseActivity {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.frame_layout, fragment);
         fragmentTransaction.commit();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater=getMenuInflater();
+        inflater.inflate(R.menu.new_menu,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId()==R.id.account)
+        {
+            Intent intent = new Intent(this, AccountActivity.class);
+            startActivity(intent);
+        }
+        else if (item.getItemId()==R.id.logout)
+        {
+            Intent intent = new Intent(this, LogoutActivity.class);
+            startActivity(intent);
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
