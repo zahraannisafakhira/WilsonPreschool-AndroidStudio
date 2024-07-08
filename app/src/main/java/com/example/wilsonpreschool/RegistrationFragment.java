@@ -1,12 +1,26 @@
 package com.example.wilsonpreschool;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -23,6 +37,11 @@ public class RegistrationFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    EditText mName, mGender, mBirthdate, mAddress, mParName, mHomPhone, mParPhone;
+    Button mSaveBtn;
+    ProgressDialog pd;
+    FirebaseFirestore db;
 
     public RegistrationFragment() {
         // Required empty public constructor
@@ -59,6 +78,75 @@ public class RegistrationFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_registration, container, false);
+        View view = inflater.inflate(R.layout.fragment_registration, container, false);
+
+        mName = view.findViewById(R.id.nameRes);
+        mGender = view.findViewById(R.id.genderRes);
+        mBirthdate = view.findViewById(R.id.birthdateRes);
+        mAddress = view.findViewById(R.id.addressRes);
+        mParName = view.findViewById(R.id.pnameRes);
+        mHomPhone = view.findViewById(R.id.hphoneRes);
+        mParPhone = view.findViewById(R.id.pphoneRes);
+        mSaveBtn = view.findViewById(R.id.saveButton);
+
+        pd = new ProgressDialog(getActivity());
+        db = FirebaseFirestore.getInstance();
+
+        mSaveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String name = mName.getText().toString().trim();
+                String gender = mGender.getText().toString().trim();
+                String birthdate = mBirthdate.getText().toString().trim();
+                String address = mAddress.getText().toString().trim();
+                String parentName = mParName.getText().toString().trim();
+                String homePhone = mHomPhone.getText().toString().trim();
+                String parentPhone = mParPhone.getText().toString().trim();
+                uploadData(name, gender, birthdate, address, parentName, homePhone, parentPhone);
+            }
+        });
+
+        return view;
+    }
+
+    private void uploadData(String name, String gender, String birthdate, String address, String parentName, String homePhone, String parentPhone) {
+        pd.setTitle("Adding Data to Firestore");
+        pd.show();
+        String id = UUID.randomUUID().toString();
+
+        Map<String, Object> doc = new HashMap<>();
+        doc.put("name", name);
+        doc.put("gender", gender);
+        doc.put("dateofbirth", birthdate);
+        doc.put("address", address);
+        doc.put("parent", parentName);
+        doc.put("phone", homePhone);
+        doc.put("parentnum", parentPhone);
+
+        db.collection("applicants").document(id).set(doc)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        pd.dismiss();
+                        Toast.makeText(getActivity(), "Uploaded...", Toast.LENGTH_SHORT).show();
+                        clearForm();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        pd.dismiss();
+                        Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+    private void clearForm() {
+        mName.setText("");
+        mGender.setText("");
+        mBirthdate.setText("");
+        mAddress.setText("");
+        mParName.setText("");
+        mHomPhone.setText("");
+        mParPhone.setText("");
     }
 }
