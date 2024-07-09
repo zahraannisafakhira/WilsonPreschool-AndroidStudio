@@ -5,7 +5,10 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,61 +16,61 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.wilsonpreschool.comments;
+import com.example.wilsonpreschool.commentsAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link BlogFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class BlogFragment extends Fragment {
 
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private RecyclerView recyclerView;
+    private commentsAdapter adapter;
+    private DatabaseReference mbase;
 
-    private String mParam1;
-    private String mParam2;
-
-    EditText mName, mEmail, mComment;
-    Button mSaveBtn;
-    ProgressDialog pd;
-    FirebaseFirestore db;
+    private EditText mName, mEmail, mComment;
+    private Button mSaveBtn;
+    private ProgressDialog pd;
+    private FirebaseFirestore db;
 
     public BlogFragment() {
         // Required empty public constructor
     }
 
-    public static BlogFragment newInstance(String param1, String param2) {
-        BlogFragment fragment = new BlogFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        mbase = FirebaseDatabase.getInstance().getReference().child("comments");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_blog, container, false);
 
+        // Set up the RecyclerView
+        recyclerView = view.findViewById(R.id.recycler1);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        FirebaseRecyclerOptions<comments> options = new FirebaseRecyclerOptions.Builder<comments>()
+                .setQuery(mbase, comments.class)
+                .build();
+
+        adapter = new commentsAdapter(options);
+        recyclerView.setAdapter(adapter);
+
+        Log.d("BlogFragment", "Adapter set to RecyclerView");
+
+        // Set up the input fields and button
         mName = view.findViewById(R.id.nameCom);
         mEmail = view.findViewById(R.id.emailCom);
         mComment = view.findViewById(R.id.descriptionCom);
@@ -89,10 +92,10 @@ public class BlogFragment extends Fragment {
         return view;
     }
 
-    private void uploadData(String name, String email, String comment) {
+    private void uploadData(final String name, final String email, final String comment) {
         pd.setTitle("Adding Data to Firestore");
         pd.show();
-        String id = UUID.randomUUID().toString();
+        final String id = UUID.randomUUID().toString();
 
         Map<String, Object> doc = new HashMap<>();
         doc.put("name", name);
@@ -106,6 +109,26 @@ public class BlogFragment extends Fragment {
                         pd.dismiss();
                         Toast.makeText(getActivity(), "Uploaded...", Toast.LENGTH_SHORT).show();
                         clearForm();
+
+                        // Add data to Realtime Database to update the RecyclerView
+                        mbase.child(id).setValue(doc)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            Log.d("BlogFragment", "Data added to Realtime Database");
+                                            // Refresh the adapter to reflect new data
+                                            adapter.notifyDataSetChanged();
+                                            recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                                        }
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.e("BlogFragment", "Failed to add data to Realtime Database", e);
+                                    }
+                                });
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -116,9 +139,32 @@ public class BlogFragment extends Fragment {
                     }
                 });
     }
+
     private void clearForm() {
         mName.setText("");
         mEmail.setText("");
         mComment.setText("");
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (adapter != null) {
+            adapter.startListening();
+            Log.d("BlogFragment", "Adapter started listening");
+        } else {
+            Log.w("BlogFragment", "Adapter is null in onStart");
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (adapter != null) {
+            adapter.stopListening();
+            Log.d("BlogFragment", "Adapter stopped listening");
+        } else {
+            Log.w("BlogFragment", "Adapter is null in onStop");
+        }
     }
 }
