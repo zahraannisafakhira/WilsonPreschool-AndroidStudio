@@ -5,16 +5,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 
-//import com.example.wilsonpreschool.AccountActivity;
+import androidx.appcompat.widget.Toolbar;  // Correct import
+
+import com.example.wilsonpreschool.AccountActivity;
 import com.example.wilsonpreschool.BlogFragment;
 import com.example.wilsonpreschool.ContactFragment;
 import com.example.wilsonpreschool.HomeFragment;
-//import com.example.wilsonpreschool.LogoutActivity;
+import com.example.wilsonpreschool.LoginActivity;
 import com.example.wilsonpreschool.ProgramsFragment;
-import com.example.wilsonpreschool.R;
+import com.example.wilsonpreschool.R;  // Correct import
 import com.example.wilsonpreschool.RegistrationFragment;
 import com.example.wilsonpreschool.databinding.ActivityMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -28,6 +33,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // Setting up the toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         replaceFragment(new HomeFragment());
 
         binding.bottomNavigationView.setOnItemSelectedListener(new BottomNavigationView.OnItemSelectedListener() {
@@ -56,5 +66,30 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.frame_layout, fragment);
         fragmentTransaction.commit();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.account) {
+            Intent intent = new Intent(MainActivity.this, AccountActivity.class);
+            startActivity(intent);
+            return true;
+        } else if (id == R.id.logout) {
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();  // Finish MainActivity to remove it from the back stack
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
     }
 }
