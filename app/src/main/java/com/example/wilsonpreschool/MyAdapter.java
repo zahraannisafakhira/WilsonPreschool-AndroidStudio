@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -38,11 +39,11 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         DataClass data = dataList.get(position);
         holder.name.setText(data.getName());
         holder.gender.setText(data.getGender());
-        holder.birth.setText(data.getBirth());
-        holder.address.setText(data.getAddress());
-        holder.parent.setText(data.getParent());
-        holder.home.setText(data.getHome());
-        holder.parents.setText(data.getParents());
+//        holder.birth.setText(data.getBirth());
+//        holder.address.setText(data.getAddress());
+//        holder.parent.setText(data.getParent());
+//        holder.home.setText(data.getHome());
+//        holder.parents.setText(data.getParents());
 
         holder.recCard.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,9 +93,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             gender = itemView.findViewById(R.id.genderApp);
             birth = itemView.findViewById(R.id.birthApp);
             address = itemView.findViewById(R.id.addressApp);
-            parent = itemView.findViewById(R.id.parentApp);
-            home = itemView.findViewById(R.id.homeApp);
-            parents = itemView.findViewById(R.id.parentsApp);
+            parent = itemView.findViewById(R.id.pnameApp);
+            home = itemView.findViewById(R.id.hphoneApp);
+            parents = itemView.findViewById(R.id.pphoneApp);
             recCard = itemView.findViewById(R.id.recCard);
         }
     }
